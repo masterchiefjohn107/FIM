@@ -1,17 +1,28 @@
 \documentclass[UTF8]{ctexart}
 \usepackage{geometry} %页面设置
 \usepackage{indentfirst} %段落缩进设置
-
-%\usepackage{chngpage} %可以设置段落整体左右缩进等等，方法是\begin{adjustwidth}{1em}{0em}
-
+\usepackage{chngpage} %可以设置段落整体左右缩进等等，方法是\begin{adjustwidth}{1em}{0em}
 \usepackage{iitem} %多重列表
+%\usepackage{mathabx} %数学符号，与amsmath冲突
+\usepackage{amsmath} %公式中输入汉字，与amssymb配合可以输入比\ge更美观的大于等于号
+\usepackage{amssymb}
 
+%section和subsection新起一页
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+%\newcommand{\subsectionbreak}{\clearpage}
 
+%定义一个强调格式，红色加粗，使用方法\qd{你的内容}，或者\begin{qds} 你的内容 \end{qds}
+\usepackage{color}
+\newcommand \qds {\bf \color{red}}
+\newcommand \qd[1] {\begin{qds} {#1} \end{qds}}
 
+%设置文档页面布局、字体、段落首行缩进、段间距
 \setCJKmainfont{微软雅黑}
 \geometry{a4paper,left=1cm,right=1cm,top=2cm,bottom=2cm}
  \setlength{\parindent}{0em}
  \setlength{\parskip}{1em}
+ 
 \title{《固定收益建模》读书笔记}
 \author{john107}
 \date{\today}
@@ -126,7 +137,103 @@
 国际清算银行发布世界衍生产品交易的统计数据。利率衍生产品市场的规模远大于外汇或股票相关衍生产品的市场规模。按未平仓合约口径，期权市场的规模大于期货市场规模，按成交量口径，则期货市场大于期权市场。
 
 \section{从债券价格构建收益率曲线}
+大部分分析师和交易商都倾向于使用根据附息债券价格所构造的收益率曲线。
 
+\subsection{自举法}
+\qd{自举法或收益率曲线剥离法（yield curve stripping）：}在有些市场，通过构造附息债券的组合来构建更长期限的零息债券。假定我们有M支债券，到期日分别为1,2，...，M个期间，每一期间只发生一笔支付，每一笔支付的支付日相同。我们可以依次为每一期间构造一个零息债券，并计算市场贴现因子$B_t^{t+1},B_t^{t+2},...,B_t^{t+M}$。方法是从$B_t^t+1$开始逐渐向后推导。
+
+自举法同样可以应用于M个债券的到期日并不是全部不同，但像上面一样，到期日期是增长的情形。只要M个债券一共至多只有M个不同的支付日，并且至多只有一个支付日没有任何一个债券发生支付，自举法就可以起作用。
+
+我们用$Y_{ij}$表示债券i（i=1,2,...,M）在时间t+j(j=1,2,...,M)的支付，这些支付中可能某些是0；$B_{i,t}$表示债券i的价格；$B_t^{t+1},B_t^{t+2},...,B_t^{t+M}$表示贴现因子，则有：
+$$
+\left(
+    \begin{array}{c}
+    B_{1,t}\\
+    B_{2,t}\\
+    \vdots \\
+    B_{M,t}
+\end{array}
+\right)
+=
+\left(
+    \begin{array}{cccc}
+    Y_{11}&Y_{12}&\cdots&Y_{1M}\\
+    Y_{21}&Y_{22}&\cdots&Y_{2M}\\
+    \vdots&\vdots&\ddots&vdots\\
+    Y_{M1}&Y_{M2}&\cdots&Y_{MM}\\
+    \end{array}
+\right)
+\left(
+    \begin{array}{c}
+    B_t^{t+1}\\
+    B_t^{t+2}\\
+    \vdots \\
+    B_t^{t+M}
+    \end{array}
+\right)
+$$
+对债券所规定的条件可以确保支付矩阵不是奇异阵，所以存在唯一解。
+
+
+或者用矩阵形式写作：$$A=BX \Rightarrow X=B^{-1}A$$
+很简单的矩阵求逆的运算。
+
+更一般的，如果市场上有M支债券交易，共有N个不同的支付日，那么上面的方程组变成M个方程，N个未知数。如果M>N，方程组可能无解，因为这可能无法找到与M个债券价格一直的贴现因子，这种情况下，市场上存在套利机会。
+
+在某些市场中，政府债券具有不同的支付日。方程组中方程的个数将少于未知数的个数。这种情况下，方程组存在许多解，也就是说，可以找到许多组既与观察价格值也与无套利原则相一致的贴现因子。
+
+\subsubsection{三次样条插值}
+
+自举法只能为所交易的债券提供（某些）支付日的贴现因子信息。三次样条插值可以估计整个贴现函数$T \mapsto B_t^T$（至少估计到某些较大的T）。为了简化符号，我们固定当前时间t并令$\bar B(\tau)=B_t^{t+\tau}$。因此函数$\bar B(\tau)$对于$\tau \in [0,\infty)$代表了t时刻的市场贴现函数。特别的，$\bar B(0)=1$。同样，对于零息债券收益率和远期利率，都使用类似的符号，即$\bar y(\tau)=y_t^{t+\tau}$和$\bar f(\tau)=f_t^{t+\tau}$。本节和下节所使用的方法都是基于一个共同的假设，那就是贴现函数$\tau \mapsto \bar B(\tau)$可以被某些包含未知参数的函数描述。参数的选择可以通过利用使设想的贴现函数所计算的理论价格贴近观察到的债券价格而得到。
+
+插值这一词表示到期时间这一坐标轴被分割成更小的区间，在不同区间贴现函数都被独立的函数（但属于同一类型）所描述。这样做的道理很简单，对于如此众多的债券和不同的到期日，试图拟合一个相对简单的函数都是非常困难的任务。为确保得到一条连续而且光滑的利率期限结构，我们必须对分割区间的到期日做些限制。
+
+给定到期日为$T_1 \leqslant T_2 \leqslant \cdots \leqslant T_M$的M支债券，将到期时间坐标轴按“节点”$0=\tau_0<\tau_1< \cdots <\tau_k=T_M$分割成子区间。对贴现函数$\bar B(\tau)$的样条估计的表达式与下式相似：
+$$\bar B(\tau)=\sum\limits_{j=0}^{k-1} G_j(\tau)I_j(\tau)$$
+在这里，$G_j$是基函数（basic function），$I_j$是阶梯函数
+$$
+I_j(\tau)=
+\left\{
+\begin{array}{l}
+1\quad \quad\tau \geqslant \tau_j \\
+0\quad \quad\text{\kaishu \emph 其他}
+\end{array}
+\right.\
+$$
+因此，
+$$
+\bar B(\tau)=
+\left\{
+\begin{array}{ll}
+G_0(\tau), & \tau \in [\tau_0,\tau_1]\\
+G_0(\tau)+G_1(\tau), & \tau \in [\tau_1,\tau_2]\\
+\vdots & \vdots \\
+G_0(\tau)+G_1(\tau)+\cdots+G_{k-1}(\tau), & \tau \geqslant \tau_{k-1}
+\end{array}
+\right.\
+$$
+我们要求基函数$G_j$必须是连续且可微的。唯有如此才能保证节点$\tau_j$处的广化过渡。多项式样条的基函数是多项式函数。我们考察一个三次样条：
+$$G_j(\tau)=\alpha_j+\beta_j(\tau-\tau_j)+\gamma_j(\tau-\tau_j)^2+\delta_j(\tau-\tau_j)^3$$
+由于$\bar B(0)=1$，可知$\alpha_0=1$
+
+为保证$G_j(\tau) $和$ G_{j+1}(\tau)$在节点$\tau=\tau_j$处过渡光滑，我们要求：
+$$
+\begin{array}{l}
+\bar B(\tau_j-) = \bar B(\tau_j+) \\
+\bar B'(\tau_j-) = \bar B'(\tau_j+) \\
+\bar B''(\tau_j-) = \bar B''(\tau_j+) 
+\end{array}
+j = 1,2,\cdots,k-1
+$$
+从而得到$\alpha_j=\beta_j=\gamma_j=0$。由此，三次样条可以简化为：
+$$\bar B(\tau)=1+\beta_0 \tau + \gamma_0 \tau^2 + \delta_0 \tau^3 + \sum\limits_{j=1}^{k-1}\delta_j(\tau-\tau_j)^3 I_j(\tau)$$
+根据无套利定价关系，我们得到：
+$$B_i=\sum\limits_{n=1}^N Y_{in} \bar B(t_n)+\epsilon_i$$
+$B_i$是债券i的当前市场价格。由于等始终不是所有的零息债券都存在交易，所以我们考虑到了误差项$\epsilon_i$，并假设它服从均值为0，方差为$\sigma^2$的正态分布，且不同债券的误差项彼此独立，可以通过普通最小二乘法估计k+2个参数$\beta_0,\gamma_0,\delta_0,\delta_1,\cdots,\delta_{k-1}$，并据此得到一个估计的贴现函数，从而进一步估计零息债券收益率曲线和远期利率。
+
+如何选择子区间的数目k和节点$\tau_j$？McCulloch（1971；1975）建议选取k为最接近$\sqrt M$的证书，并将节点定义为
+$$\tau_j=T_{h_j}+\theta_j(T_{h_j + 1} - T_{h_j})$$
+其中$h_j=[j \cdot M/k]$，括号[ ]代表整数部分，且$\theta_j=j \cdot M/k-h_j$，特别地，$\tau_k=T_M$。此外，遵循以后会讨论的“期限偏好”（preferred habitats）的思想，我们也可以将节点放在1年、5年、10年，这样子区间就可以广义地与短期、中期、长期等细分市场对应起来。
 \end{document}
 
 
