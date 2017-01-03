@@ -5,9 +5,11 @@
 \usepackage{iitem} %多重列表
 %\usepackage{mathabx} %数学符号，与amsmath冲突
 \usepackage{amsmath} %公式中输入汉字，与amssymb配合可以输入比\ge更美观的大于等于号
-\usepackage{amssymb}
-
+\usepackage{float}
+\usepackage{amssymb,amsfonts}
+\usepackage{mathrsfs}
 %section和subsection新起一页
+\usepackage{caption} %取消figure下的编号
 \usepackage{titlesec}
 \newcommand{\sectionbreak}{\clearpage}
 %\newcommand{\subsectionbreak}{\clearpage}
@@ -22,7 +24,22 @@
 \geometry{a4paper,left=1cm,right=1cm,top=2cm,bottom=2cm}
  \setlength{\parindent}{0em}
  \setlength{\parskip}{1em}
- 
+ \usepackage{listings} %插入代码  
+\usepackage{xcolor} %代码高亮  
+   
+\lstset{numbers=left, %设置行号位置  
+        numberstyle=\tiny, %设置行号大小  
+        keywordstyle=\color{blue}, %设置关键字颜色  
+        commentstyle=\color[cmyk]{1,0,1,0}, %设置注释颜色  
+        frame=single, %设置边框格式  
+        escapeinside=``, %逃逸字符(1左面的键)，用于显示中文  
+        breaklines, %自动折行  
+        extendedchars=false, %解决代码跨页时，章节标题，页眉等汉字不显示的问题  
+        xleftmargin=2em,xrightmargin=2em, aboveskip=1em, %设置边距  
+        tabsize=4, %设置tab空格数  
+        showspaces=false %不显示空格  
+       }  
+
 \title{《固定收益建模》读书笔记}
 \author{john107}
 \date{\today}
@@ -264,7 +281,87 @@ $$B_i=\sum\limits_{n=1}^N Y_{in}exp\{-a\tau-b\theta(1-e^{-\tau/\theta})-c\tau e^
 
 \section{随机过程与随机分析}
 
+另$x=(x_t)_{t \in \mathscr{T}}$为一个定义在滤过概率空间$(\Omega,\mathscr{F},\mathbb{P},F=(\mathscr{F}_t)_{t \in \mathscr{T}})$之上的一个随机过程。每一可能的结果$t \in \Omega$将完全确定随机过程在所有时间点的取值。我们将$(x_t(\omega))_{t \in \mathscr{T}}$的实现值称为随机过程的一条\qd{（样本）路径}
 
+随着时间的推移，我们将获得关于真实结果的新信息。通常我们将修改随机过程的未来取值的期望，或者更准确地讲，修正我们对随机过程在未来任何时点的取值的概率分布。
+
+如果对所有$t,t' \in \mathscr{T} \text{且} t<t'$，和所有的集合$A$，我们有
+$$\mathbb{P}(x_{t'} \in A|(x_s)_{s \in [0,t]})=\mathbb{P}(x_{t'} \in A|x_t)$$
+那么x就是一个\qd{马尔科夫过程（Markov Process）}。从广义上讲，这种情形说明未来独立于过去。历史不包含关于未来值的任何信息，也就是说，未来值不能从当前值提取出来。马尔科夫过程经常在金融模型中用于描述金融资产价格的变化，因为马尔科夫性质与所谓的弱有效市场理论是一致的。后者认为，人们不能利用资产的精确的历史数据获得超额收益。此外，基于马尔科夫过程的模型通常比没有马尔科夫过程的模型更易驾驭。
+
+如果在所有的时间点，随机过程值在未来任何期间的变化的期望为零，这以随机过程叫做\qd{鞅（martingale）}。换言之，随机过程的未来值等于随机过程的当前值。因为期望依赖于概率测度，所以鞅的概念与概率测度的应用有关系。更严格地讲，如果一个随机过程$x=(x_t)_{t \geqslant 0}$对所有的$t \in \mathscr{T}$是一个$\mathbb{P}$---鞅，我们有
+$$E_t^\mathbb{P}[x_{t'}]=x_t \text{，对所有}t' \in \mathscr{T} \text{且} t'>t \text{时}$$
+在此，$E_t^\mathbb{P}$表示给定t时刻所能获得的信息，也就是说，给定随机过程到t时刻且包含t时刻的历史，在$\mathbb{P}$---概率之下计算的期望。
+
+进一步假设所有的随机变量$x_t$都从同一个集合$S$中取值，我们称这一集合为\qd{值空间（value space）}。更精确地讲，这意味着$S$是具有$\mathbb{P}(\{x_t \in S\})=1$的性质的最小集合。如果$S \subseteq \mathbb{R}$，将这以随机过程称为一维实数过程。如果$S$是$\mathbb{R}^K$的子集，（非$\mathbb{R}^{K-1}$的子集），将这一随机过程称为$K$---维实数过程，这一过程也可以视为一个由$K$个一维实数过程所构成的集合。注意，只要将自己限定在等价概率测度，改变概率测度不会影响值空间。
+
+在许多情况下，连续时间随机过程比离散时间随机过程更容易处理。
+
+数学中对连续变量随机过程的分析处理比对离散变量随机过程的分析处理更容易，也更优雅。积分比求和容易，求导比差分容易，如此等等，不一而足。
+
+如今，连续时间期限结构模型已经成为金融行业和学术界的标准。我们将使用连续时间、连续变量随机过程来描述资产价格和利率的变化。
+
+随机过程标准的建模步骤是假设存在某些共同的外生冲击，这些冲击对模型所有相关的变量产生影响，然后为所有变量对这一冲击的所做出的反应建立模型。
+
+在本书研究的几乎所有连续时间模型，我们都假设所有的基本外生冲击是服从正态分布，也就是说，冲击过程$z$在任何时间区间的变化服从正态分布。具有这一特性的随机过程$z$就是所谓的标准布朗运动。
+
+\subsection{布朗运动}
+
+一个（一维）的随机过程$z=(z_t)_{t \geqslant 0}$被称为一个\qd{标准布朗运动（Standard Brownian Motion）}，如果它满足下列条件：
+\begin{itemize}
+    \item{$z_0=0$}
+    \item{对所有$t,t' \geqslant 0 \text{且} t<t':z_{t'}-z_t~N(0,t'-t)$[增量服从正态分布]}
+    \item{对所有$0 \leqslant t_0 < t_1 < \cdots < t_n$，随机变量$z_{t_1}-z_{t_0},\cdots,z_{t_n}-z_{t_{n-1}}$彼此独立[增量彼此独立]}
+    \item{$z$有连续的路径}
+\end{itemize}
+
+标准布朗运动是马尔科夫过程，因为从今天开始到任何未来时间点的增量独立于随机过程的历史。标准布朗运动也是一个鞅，因为该过程的变化的期望值为0。
+
+标准布朗运动的路径是无处可微的。不过我们可以通过模拟布朗运动过程在不同时点的取值来获得大概的印象。如果$\epsilon_1,\cdots,\epsilon_n$从标准$N(0,1)$分布中独立抽取，我们可以模拟$0 \equiv t_0 <t_1 <t_2 \cdots <t_n$标准布朗运动的取值如下：
+$$z_{t_i}=z_{t_{i-1}}+\epsilon_i \sqrt{t_i-t_{i-1}},i=1,\cdots,n$$
+选取更多的时间点，也就是更短的时间间隔，我们就能获得布朗运动路径更贴近真实的印象。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{P41.pdf}
+    \caption*{根据200个间隔所产生的标准布朗运动的模拟路径}
+    \label{fig:BrownMotion1}
+\end{figure}
+
+\qd{广义布朗运动（generalized Brownian motion），或算数布朗运动或广义维纳过程}：随机过程$x=(x_t)_{t \geqslant 0}$，其中$x_t=x_0+\mu t +\sigma z_t,t \geqslant 0$。参数$\mu$反映了过程在单位时间里的期望变化，叫做票一律或简单称为“漂移”（drift）。参数$\sigma^2$反映了过程未来的不确定性，被称为过程的方差率（variance rate）。参数$\sigma$被称为过程的波动率。
+
+广义布朗运动继承了标准布朗运动的很多特征。例如，广义布朗运动同样是马尔科夫过程，广义布朗运动的路径是连续的但处处不可微。除非$\mu=0$，广义布朗运动不是一个鞅。广义布朗运动的路径可以通过选择时间点$0 \equiv t_0 <t_1 <t_2< \cdots <t_n$并迭代计算
+$$x_{t_i}=x_{t_{i-1}}+\mu(t_i-t_{i-1})+\epsilon_i \sigma \sqrt{t_i-t_{i-1}},i=1,\cdots,n$$
+而得到，在此$\epsilon_1,\cdots,\epsilon_n$从标准正态分布中独立抽取。
+
+如果参数$\mu$和$\sigma$随时间以确定性的方式变动，那么这一过程被成为非时齐的广义布朗运动。这样的过程可以用微分的形式表示为
+$$dx_t=\mu(t)dt+\sigma(t)dz_t$$
+观察一个很短的间隔$[t,t+\delta t]$，期望的变化近似于$\mu(t)\delta t$，该变化的方差近似为$\sigma(t)^2 \delta t$。更准确地讲，在任何间隔$[t,t']$的增量为
+$$x_{t'}-x_t=\int_t^{t'}\mu(u)du+\int_t^{t'}\sigma(u)dz_u$$
+最后一项积分就是所谓的随机积分，将在以后介绍。我们也将介绍一个定理，根据该定理，从时刻t起，积分$\int_t^{t'}\sigma(u)dz_u$是一个服从均值为0方差为$\int_t^{t'}\sigma(u)^2du$的随机变量。
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{P43.pdf}
+    \caption*{广义布朗运动的模拟，其中$\mu=0.2,\sigma 1=0.5,\sigma 2=1.0$}
+\end{figure}
+
+\begin{lstlisting}[language=R]  
+pdf(file="F:\\生活\\阅读材料\\固定收益建模\\FixedIncomeModelling.git\\trunk\\P43.pdf")
+mu=0.2/200
+sigma1=0.5
+sigma2=1.0
+r1 <- rnorm(200,mean=0,sd=sqrt(1/200))
+r2 <- rnorm(200,mean=0,sd=sqrt(1/200))
+tn <- 1:200
+plot(mu*tn,type="l",ylim=c(-1,1))
+lines(mu*tn+sigma1*cumsum(r1),type="l",lty=2)
+lines(mu*tn+sigma2*cumsum(r2),type="l",lty=3)
+legend("topleft",legend=expression(paste(sigma,"=0",sep=""),paste(sigma,"=0.5",sep=""),paste(sigma,"=1.0",sep="")),
+       lty=c(1,2,3))
+dev.off()
+\end{lstlisting}
+
+\subsection{扩散过程}
 \end{document}
 
 
