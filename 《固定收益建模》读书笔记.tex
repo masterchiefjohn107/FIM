@@ -392,6 +392,50 @@ $$x_{t'}-x_t=\int_t^{t'}\mu_u du +\int_t^{t'} \sigma_u dz_u$$
 最后一项还是一个随机积分项。
 
 \subsection{随机积分}
+
+形如$\int_t^{t'} \sigma(x_u,u)dz_u$的积分项，被称为随机积分或伊藤积分。尽管随机积分也可以定义为对更广义的随机过程积分，我们只考察积分变量$z$为标准布朗运动的情况。
+
+如果$\sigma=(\sigma_t)$满足正则条件，随机积分$\int_t^{t'}\sigma_u dz_u$具有以下特征：
+$$E_t[\int_t^{t'}\sigma_u dz_u]=0$$
+$$Var_t[\int_t^{t'}\sigma_u dz_u]=\int_t^{t'}E_t[\sigma_u^2]du$$
+\qd{证明暂略}
+
+如果$\sigma(u)$是一个关于时间的确定梁函数，随机变量$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布。
+\qd{证明暂略}
+
+布朗运动时任何子区间的增量服从均值为0，方差等于子区间长度的正态分布。
+
+\qd{鞅表示定理\footnote{参考$\varnothing ksendal$(2003，定理4.3.4)}：}假定过程$M=(M_t)$是一个由标准布朗运动$z=(z_t)_{t \in [0,T]}$隐式定义的滤过概率空间的一个鞅，信息渗流是$\textbf{F}=\textbf{F}^Z$，那么存在一个唯一的适应过程$\theta=(\theta_t)$使得对所有$t$，$M_t=M_0+\int_o^t \theta_u dz_u$
+
+\subsection{莱布尼兹随机积分规则}
+
+对于任何$s \in [t_0,T]$，令$f^s=(f_t^s)_{t \in [to,s]}$是由$$df_t^s=\alpha_t^s dt+\beta_t^s dz$$所决定的的伊藤过程，其中$\alpha^s$和$\beta^s$为良态随机过程。那么随机过程$Y(t)=\int_t^T f_t^s ds$的动态特征由$$dY_t=[(\int_t^T \alpha_t^s ds)-f_t^t]dt+(\int_t^T \beta_t^s ds)dz_t$$给出
+
+\subsection{伊藤引理}
+
+伊藤引理基本上就是随机过程的链式法则。我们所表述的是一个广义伊藤过程的结果，但大多数时候是将这一结果应用于扩散过程的函数这一特殊情形。
+
+\qd{伊藤引理：}令$x=(t_t)_{t \geqslant 0}$是一个具有动态特征$$dx_t=\mu_t dt +\sigma_t dz_t$$的实数伊藤过程，其中$\mu$和$\sigma$都是实数过程，$z$是一个一维的标准布朗运动。令$g(x,t)$为一个对$x$两次连续可微，对t可微的实数函数。那么由$$y_t=g(x_t,t)$$定义的过程$y=(y_t)_{t \geqslant 0}$就是一个具有以下动态特征$$dy_t=(\frac{\partial g}{\partial x}(x_t,t) 
++ \frac{\partial g}{\partial x}(x_t,t) \mu_t 
++ \frac{1}{2}\frac{\partial^2 g}{\partial x^2}(x_t,t) \sigma_t^2)dt
++\frac{\partial g}{\partial x}(x_t,t) \sigma_t dz_t$$的伊藤过程。
+
+对伊藤引理的证明是基于$g(x_t,t)$的泰勒展开并取相应的极限\footnote{Oksendal(2003,Chap.4)}。结果可以写成以下更便于记忆的形式
+$$dy_t=\frac{\partial g}{\partial t}(x_t,t) dt
++\frac{\partial g}{\partial x}(x_t,t) dx_t
++\frac{1}{2} \frac{\partial^2 g}{\partial x^2}(x_t,t)(dx_t)^2$$
+
+在计算$(dx_t)^2$时，我们必须应用到$(dt)^2=dt \cdot dz_t =0$以及$(dz_t)^2=dt$，因此
+$$(dx_t)^2=(\mu_t dt+\sigma_t dz_t)^2=\mu^2_t (dt)^2 +2 \mu_t \sigma_t dt \cdot \dz_t + \sigma^2_t (dz_t)^2=\sigma^2_tdt$$
+这些规则背后的直觉解释是：当$dt$接近于0时，$(dt)^2$被忽略。由于$dz_t~N(0,dt)$，我们得到$E[dt \cdot dz_t]=dt \cdot E[dz_t]=0$和$Var[dt \cdot dz_t]=(dt)^2 \cdot Var[dz_t]=(dt)^3$，同样可以忽略。最后我们有$E[(dz_t)^2]=Var[dz_t]-(E[dz_t])^2=dt$，随之可以证明$Var[(dz_t)^2]=2(dt)^2$。对接近于0的$dt$，方差远小于均值，所以$(dz_t)^2$可以用其均值近似。
+
+\subsection{几何布朗运动}
+
+\subsection{奥恩斯坦-乌伦贝克过程（Ornstein-Uhlenbeck process）}
+
+\subsection{平方根过程}
+
+
 \end{document}
 
 
