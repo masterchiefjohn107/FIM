@@ -281,7 +281,9 @@ $$B_i=\sum\limits_{n=1}^N Y_{in}exp\{-a\tau-b\theta(1-e^{-\tau/\theta})-c\tau e^
 
 \section{随机过程与随机分析}
 
-另$x=(x_t)_{t \in \mathscr{T}}$为一个定义在滤过概率空间$(\Omega,\mathscr{F},\mathbb{P},F=(\mathscr{F}_t)_{t \in \mathscr{T}})$之上的一个随机过程。每一可能的结果$t \in \Omega$将完全确定随机过程在所有时间点的取值。我们将$(x_t(\omega))_{t \in \mathscr{T}}$的实现值称为随机过程的一条\qd{（样本）路径}
+\qd{迭代期望定律（Law of Iterated Expectations）}：如果$\mathscr{F}$和$\mathscr{G}$是两个$\sigma$--代数，且$\mathscr{F} \subseteq \mathscr{G}$，$X$是一个随机变量，那么$E[E[X|\mathscr{G}]|\mathscr{F}]=E[X|\mathscr{F}]$，特别地，如果$(\mathscr{F}_t)_{t \in \mathscr{T}}$是一个信息渗流且$t'>t$，有$$E_t[E_{t'}[X]]=E_t[X]$$并不严格地讲，这一定理告诉你的是，你今天对某个变量2天后的实现的期望等于今天你对该变量明天的实现的期望。
+
+令$x=(x_t)_{t \in \mathscr{T}}$为一个定义在滤过概率空间$(\Omega,\mathscr{F},\mathbb{P},F=(\mathscr{F}_t)_{t \in \mathscr{T}})$之上的一个随机过程。每一可能的结果$t \in \Omega$将完全确定随机过程在所有时间点的取值。我们将$(x_t(\omega))_{t \in \mathscr{T}}$的实现值称为随机过程的一条\qd{（样本）路径}
 
 随着时间的推移，我们将获得关于真实结果的新信息。通常我们将修改随机过程的未来取值的期望，或者更准确地讲，修正我们对随机过程在未来任何时点的取值的概率分布。
 
@@ -415,7 +417,7 @@ $$Var_t[\int_t^{t'}\sigma_u dz_u]=\int_t^{t'}E_t[\sigma_u^2]du$$
 
 伊藤引理基本上就是随机过程的链式法则。我们所表述的是一个广义伊藤过程的结果，但大多数时候是将这一结果应用于扩散过程的函数这一特殊情形。
 
-\qd{伊藤引理：}令$x=(t_t)_{t \geqslant 0}$是一个具有动态特征$$dx_t=\mu_t dt +\sigma_t dz_t$$的实数伊藤过程，其中$\mu$和$\sigma$都是实数过程，$z$是一个一维的标准布朗运动。令$g(x,t)$为一个对$x$两次连续可微，对t可微的实数函数。那么由$$y_t=g(x_t,t)$$定义的过程$y=(y_t)_{t \geqslant 0}$就是一个具有以下动态特征$$dy_t=(\frac{\partial g}{\partial x}(x_t,t) 
+\qd{伊藤引理：}令$x=(t_t)_{t \geqslant 0}$是一个具有动态特征$$dx_t=\mu_t dt +\sigma_t dz_t$$的实数伊藤过程，其中$\mu$和$\sigma$都是实数过程，$z$是一个一维的标准布朗运动。令$g(x,t)$为一个对$x$两次连续可微，对t可微的实数函数。那么由$$y_t=g(x_t,t)$$定义的过程$y=(y_t)_{t \geqslant 0}$就是一个具有以下动态特征$$dy_t=(\frac{\partial g}{\partial t}(x_t,t) 
 + \frac{\partial g}{\partial x}(x_t,t) \mu_t 
 + \frac{1}{2}\frac{\partial^2 g}{\partial x^2}(x_t,t) \sigma_t^2)dt
 +\frac{\partial g}{\partial x}(x_t,t) \sigma_t dz_t$$的伊藤过程。
@@ -430,6 +432,15 @@ $$(dx_t)^2=(\mu_t dt+\sigma_t dz_t)^2=\mu^2_t (dt)^2 +2 \mu_t \sigma_t dt \cdot 
 这些规则背后的直觉解释是：当$dt$接近于0时，$(dt)^2$被忽略。由于$dz_t~N(0,dt)$，我们得到$E[dt \cdot dz_t]=dt \cdot E[dz_t]=0$和$Var[dt \cdot dz_t]=(dt)^2 \cdot Var[dz_t]=(dt)^3$，同样可以忽略。最后我们有$E[(dz_t)^2]=Var[dz_t]-(E[dz_t])^2=dt$，随之可以证明$Var[(dz_t)^2]=2(dt)^2$。对接近于0的$dt$，方差远小于均值，所以$(dz_t)^2$可以用其均值近似。
 
 \subsection{几何布朗运动}
+
+如果一个随机过程$x=(x_t)_{t \geqslant 0}$是随机微分方程$$dx_t=\mu x_t dt + \sigma x_t dz_t$$的一个解，那么这一随机过程就是一个几何布朗运动。其中$\mu,\sigma$都是常数。假定初始值$x_0>0$。
+
+路径可以通过迭代计算获得。例如：
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{P51.pdf}
+    \caption*{几何布朗运动的模拟路径，其中$\mu=0.1,\sigma 1=0.2,\sigma 2=0.5$}
+\end{figure}
 
 \subsection{奥恩斯坦-乌伦贝克过程（Ornstein-Uhlenbeck process）}
 
