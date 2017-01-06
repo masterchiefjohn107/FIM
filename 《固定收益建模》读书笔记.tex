@@ -40,6 +40,28 @@
         showspaces=false %不显示空格  
        }  
 
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{第\thesection 章\ #1}{}}
+\lhead{《固定收益建模》读书笔记}
+\chead{}
+\rhead{john107}
+%===============
+%双线页眉的设置
+\makeatletter %双线页眉
+\def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
+\hrule\@height 1.0pt \@width\headwidth\vskip1pt%上面线为1pt粗
+\hrule\@height 0.5pt\@width\headwidth  %下面0.5pt粗
+\vskip-2\headrulewidth\vskip-1pt}      %两条线的距离1pt
+  \vspace{6mm}}     %双线与下面正文之间的垂直间距
+\makeatother
+%===============
+\lfoot{}
+\cfoot{}
+\rfoot{ \thepage\ / \pageref{LastPage}}
+
+
 \title{《固定收益建模》读书笔记}
 \author{john107}
 \date{\today}
@@ -49,6 +71,7 @@
 \clearpage
 \tableofcontents
 \clearpage
+
 \section{概述}
 许多固定收益证券的价格都通过各种利率和收益率来表示，所以了解固定收益定价等同于了解利率的行为。利率期限结构是固定收益分析和利率变动中的关键概念
 
@@ -402,7 +425,7 @@ $$E_t[\int_t^{t'}\sigma_u dz_u]=0$$
 $$Var_t[\int_t^{t'}\sigma_u dz_u]=\int_t^{t'}E_t[\sigma_u^2]du$$
 \qd{证明暂略}
 
-如果$\sigma(u)$是一个关于时间的确定梁函数，随机变量$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布。
+如果$\sigma(u)$是一个关于时间的确定量函数，随机变量$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布。
 \qd{证明暂略}
 
 布朗运动时任何子区间的增量服从均值为0，方差等于子区间长度的正态分布。
@@ -441,9 +464,94 @@ $$(dx_t)^2=(\mu_t dt+\sigma_t dz_t)^2=\mu^2_t (dt)^2 +2 \mu_t \sigma_t dt \cdot 
     \includegraphics[scale=0.6]{P51.pdf}
     \caption*{几何布朗运动的模拟路径，其中$\mu=0.1,\sigma 1=0.2,\sigma 2=0.5$}
 \end{figure}
+\begin{lstlisting}[language=R]  
+pdf(file="C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P51.pdf")
+x <- c()
+y <- c()
+x[1] <- 100
+y[1] <- 100
+mu <- 0.1/200
+sigma1 <- 0.2/sqrt(200)
+sigma2 <- 0.5/sqrt(200)
+epsilon <- rnorm(200)
+for (i in 1:200) {
+  x[i+1] <- x[i]+mu * x[i] + sigma1 * x[i] * epsilon[i]
+  y[i+1] <- y[i]+mu * y[i] + sigma2 * y[i] * epsilon[i]
+}
+plot(c(0,200),c(100,110),type="l",ylim = c(min(y),max(y)))
+lines(0:200,x,type="l",col="red")
+lines(0:200,y,type="l",col="blue")
+grid()
+legend("topleft",legend=expression(paste(sigma,"=0",sep=""),paste(sigma,"=0.2",sep=""),paste(sigma,"=0.5",sep="")),lty=1,col=c("black","red","blue"))
+dev.off()
+\end{lstlisting}
 
-\subsection{奥恩斯坦-乌伦贝克过程（Ornstein-Uhlenbeck process）}
+对函数$g(x,t)=lnx$应用伊藤引理并定义过程$y_t=g(x_t,t)=lnx_t$。由
+$$\frac{\partial g}{\partial t}(x_t,t)=0,\frac{\partial g}{\partial x}(x_t,t)=\frac{1}{x_t},\frac{\partial^2 g}{\partial x^2}(x_t,t)=-\frac{1}{x_t^2}$$
+根据伊藤引理可得
+$$dy_t=(0+\frac{1}{x_t}\mu x_t-\frac{1}{2} \frac{1}{x_t^2} \sigma^2 x_t^2)dt+\frac{1}{x_t}\sigma x_t dz_t=(\mu-\frac{1}{2}\sigma^2)dt+\sigma dz_t$$
+因此，$y_t=lnx_t$是一个广义布朗运动。对上式进一步转换
+$$lnx_{t'}-lnx_t=(\mu-\frac{1}{2}\sigma^2)(t'-t)+\sigma (z_{t'}-z_t)$$
+$$lnx_{t'}=lnx_t+(\mu-\frac{1}{2}\sigma^2)(t'-t)+\sigma (z_{t'}-z_t)$$
+$$x_{t'}=x_t exp\{ (\mu-\frac{1}{2}\sigma^2)(t'-t)+\sigma (z_{t'}-z_t) \}$$
+对所有$t'>t \geqslant 0$都成立，特别地
+$$x_{t'}=x_0 exp\{ (\mu-\frac{1}{2}\sigma^2)t'+\sigma z_{t'} \}$$
+可见，几何布朗运动的值空间为$S=(0,\infty)$
 
+假定我们站在时点$t$且已经观察到几何布朗运动的当前值$x_t$，那么如何确定未来$x_{t'}$的概率分布呢？由于$z_{t'}-z_t~N(0,t'-t)$，从而可知$x_{t'}$服从对数正态分布，$x_{t'}\text{（给定}x_t \text{）}$的概率密度函数是
+$$f(x)=\frac{1}{x \sqrt{2 \pi \sigma^2 (t'-t)}}exp\{ -\frac{1}{2 \sigma^2(t'-t)}(ln(\frac{x}{x_t})-(\mu-\frac{1}{2}\sigma^2)(t'-t))^2 \},x>0$$
+均值和方差是
+$$E_t[x_{t'}]=x_t e^{\mu(t'-t)}$$
+$$Var_t[x_{t'}]=x_t^2 e^{2 \mu (t'-t)}[e^{\sigma^2(t'-t)}-1]$$
+
+因为漂移率和波动率都独立于时间，所以上文讨论的几何布朗运动是时齐的。我们同样通道了非时齐的变体，如
+$$dx_t=\mu(t)x_t dt+\sigma(t) x_t dz_t$$
+在此，$\mu$和$\sigma$都是关于时间的确定性函数。根据与时齐几何布朗运动相同的处理，我们可以证明这一非时齐的变体满足
+$$x_{t'}=x_t exp\{ \int_t^{t'}(\mu(u)-\frac{1}{2}\sigma(u)^2)du+\int_t^{t'}\sigma(u)dz_u \}$$
+
+根据定理
+\begin{quote}
+\kaishu
+如果$\sigma(u)$是一个关于时间的确定量函数，随机变量$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布。
+\end{quote}
+$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布，因此，非时齐的几何布朗运动的未来值通用服从对数正态分布，此外，我们有
+$$E_t[x_{t'}]=x_t e^{\int_t^{t'}\mu(u)du}$$
+$$Var_t[x_{t'}]=x_t^2 e^{2 \int_t^{t'}\mu(u)du}(e^{\int_t^{t'}\sigma(u)^2 du}-1)$$
+\subsection{奥恩斯坦-乌伦贝克过程（Ornstein-Uhlenbeck process，简称OU过程）}
+$dx_t=[\varphi - \kappa x_t]dt+\beta dz_t$，其中$\varphi,\beta\kappa$都是常数，且$\kappa>0$
+或写为$dx_t=\kappa[\theta- x_t]dt+\beta dz_t$，在此，$\theta=\varphi/\kappa$
+OU过程具有均值回归特征，也就是说当$x_t<0$时，漂移率为正，当$x_t>0$时，漂移率为负。因此，该过程总是拉响其长期水平$\theta$。但是，由$\beta dz_t$所代表的的随机外部冲击可能导致过程进一步偏离$\theta$。参数$\kappa$控制了回归长期水平的期望调整幅度，因此通常被称为均值回归参数或调整速度。
+
+为确定OU过程的未来值分布，令$y_t=g(x_t,t)=e^{\kappa t}x$，可证明$y_t$是一个广义布朗运动：
+\begin{align}
+dy_t 
+&=[\frac{\partial g}{\partial t}(x_t,t)+\frac{\partial g}{\partial x}(x_t,t)(\varphi-\kappa x_t)+\frac{1}{2} \frac{\partial^2 g}{\partial x^2}(x_t,t)\beta^2]dt+\frac{\partial g}{\partial x}(x_t,t)\beta dz_t \notag \\
+&=[\kappa e^{\kappa t} x_t+e^{\kappa t}(\varphi-\kappa x_t)]dt+e^{\kappa t}\beta dz_t \notag  \\
+&=\varphi e^{\kappa t} dt+\beta e^{\kappa t} dz_t \notag
+\end{align}
+
+这隐含着
+$$y_{t'}=y_t+\int_t^{t'}\varphi e^{\kappa u}du +\int_t^{t'}\beta e^{\kappa u}dz_u$$
+将$y_{t'},y_t$定义代入，并乘以$-e^{\kappa t'}$，得到
+\begin{align}	
+x_{t'}
+&=e^{-\kappa (t'-t)}x_t+\int_t^{t'}\varphi e^{-\kappa (t'-u)}du+\int_t^{t'}\beta e^{-\kappa (t'-u)}dz_u
+ \notag \\
+&=e^{-\kappa (t'-t)}x_t+\theta(1-e^{-\kappa (t'-t)})+\int_t^{t'}\beta e^{-\kappa (t'-u)}dz_u
+\notag
+\end{align}
+这对于所有$t' > t \geqslant 0$成立。特别地，上述随机微分方程的解可记为
+$$x_t=e^{-\kappa t}x_0+\theta(1-e^{-\kappa t})+\int_0^t \beta e^{-\kappa (t-u)}dz_u$$
+根据定理
+\begin{quote}
+\kaishu
+如果$\sigma(u)$是一个关于时间的确定量函数，随机变量$\int_t^{t'}\sigma(u) dz_u$服从均值为0，方差为$\int_t^{t'}\sigma(u)^2 dz_u$的正态分布。
+\end{quote}
+积分$\int_t^{t'}\beta e^{-\kappa (t'-u)}dz_u$服从均值为0，方差为$\int_t^{t'}\beta^2 e^{-2\kappa (t'-u)}dz_u=\frac{\beta^2}{2 \kappa}(1-e^{-2 \kappa(t'-t)})$的正态分布。因此能够得出$x_{t'}$（给定$x_t$）服从正态分布的结论，其均值和方差分别为
+\begin{align}
+E_t[x_{t'}] &= e^{-\kappa (t'-t)}x_t+\theta(1-e^{-\kappa (t'-t)}) \notag \\
+Var_t[x_{t'}] &=\frac{\beta^2}{2 \kappa}(1-e^{-2 \kappa(t'-t)}) \notag
+\end{align}
 \subsection{平方根过程}
 
 
