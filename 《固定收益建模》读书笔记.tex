@@ -552,7 +552,32 @@ $$x_t=e^{-\kappa t}x_0+\theta(1-e^{-\kappa t})+\int_0^t \beta e^{-\kappa (t-u)}d
 E_t[x_{t'}] &= e^{-\kappa (t'-t)}x_t+\theta(1-e^{-\kappa (t'-t)}) \notag \\
 Var_t[x_{t'}] &=\frac{\beta^2}{2 \kappa}(1-e^{-2 \kappa(t'-t)}) \notag
 \end{align}
+
+OU过程的值空间为$\mathscr{R}$。对于$t' \rightarrow \infty$，均值趋向于$\theta$，方差趋向于$\beta^2/(2\kappa)$。对于$\kappa \rightarrow \infty$，均值趋向于$\theta$，方差趋向于0。对于$\kappa \rightarrow 0$，均值趋向于当前值$x_t$，方差趋向于$\beta^2(t'-t)$。过程当前水平与长期水平之间的距离在$t'-t=ln(2)/\kappa$时间后减半，这是因为$E_t[x_{t'}]-\theta=\frac{1}{2}(x_t-\theta)$隐含着$e^{-\kappa(t'-t)}=\frac{1}{2}$，因此，$t'-t=ln(2)/\kappa$。
+
+OU过程的路径可以用以下公式迭代产生：
+$$x_{t_i}=x_{t_{i-1}}+\kappa[\theta-x_{t_{i-1}}](t_i-t_{i-1})+\beta \epsilon_i \sqrt{t_i-t_{i-1}}$$
+
+\begin{figure}[H]
+\centering
+\includegraphics{P54.pdf}
+
+\caption*{OU过程的模拟路径\footnotemark}
+\end{figure}
+\footnotetext{基本参数取值为$x_0=\theta=0.08,\kappa=ln2\approx 0.69,\beta=0.03$}
+
+非时齐OU过程的$\varphi,\beta$都由确定量函数替代
+$$dx_t=[\varphi(t)-\kappa x_t]dt+\beta(t)dz_t=\kappa[\theta(t)-x_t]dt+\beta(t)dz_t$$
+根据与之前一样的分析，可以看到给定$x_t$的情况下，$x_{t'}$服从正态分布，其均值和方差分别为
+\begin{align}
+E_t[x_{t'}] &= e^{-\kappa (t'-t)}x_t+\int_t^{t'}\varphi(u) e^{-\kappa (t'-u)} du \notag \\
+Var_t[x_{t'}] &=\int_t^{t'}\beta(u)^2 e^{-2 \kappa(t'-u)}du \notag
+\end{align}
+也可以令$\kappa$也是时间的函数，但是用不到这样的推广。
+最早的利率期限结构动态模型之一，就是假设短期利率遵循OU过程，目前仍然经常应用。
+
 \subsection{平方根过程}
+
 
 
 \end{document}
