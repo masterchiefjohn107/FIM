@@ -32,7 +32,7 @@
         keywordstyle=\color{blue}, %设置关键字颜色  
         commentstyle=\color[cmyk]{1,0,1,0}, %设置注释颜色  
         frame=single, %设置边框格式  
-        escapeinside=``, %逃逸字符(1左面的键)，用于显示中文  
+        escapeinside=\#, %逃逸字符(1左面的键)，用于显示中文  
         breaklines, %自动折行  
         extendedchars=false, %解决代码跨页时，章节标题，页眉等汉字不显示的问题  
         xleftmargin=2em,xrightmargin=2em, aboveskip=1em, %设置边距  
@@ -466,7 +466,7 @@ $$(dx_t)^2=(\mu_t dt+\sigma_t dz_t)^2=\mu^2_t (dt)^2 +2 \mu_t \sigma_t dt \cdot 
 \end{figure}
 \begin{lstlisting}[language=R]  
 pdf(file="C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P51.pdf")
-x <- c()
+x <- c() #空数组
 y <- c()
 x[1] <- 100
 y[1] <- 100
@@ -565,6 +565,8 @@ $$x_{t_i}=x_{t_{i-1}}+\kappa[\theta-x_{t_{i-1}}](t_i-t_{i-1})+\beta \epsilon_i \
 \caption*{OU过程的模拟路径\footnotemark}
 \end{figure}
 \footnotetext{基本参数取值为$x_0=\theta=0.08,\kappa=ln2\approx 0.69,\beta=0.03$}
+生成代码如下
+\lstinputlisting[language=R]{P54.R}
 
 非时齐OU过程的$\varphi,\beta$都由确定量函数替代
 $$dx_t=[\varphi(t)-\kappa x_t]dt+\beta(t)dz_t=\kappa[\theta(t)-x_t]dt+\beta(t)dz_t$$

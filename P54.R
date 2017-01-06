@@ -1,10 +1,10 @@
 require(ggplot2)
 require(reshape2)
-n <- 200 #½«Á½Ìì200µÈ·Ö
-u_kappa=log(2)
-u_beta=0.03
-u_theta=0.08
-x0=0.08
+n <- 200 #å°†ä¸¤å¤©200ç­‰åˆ†
+u_kappa <- log(2)
+u_beta <- 0.03
+u_theta <- 0.08
+x0 <- 0.08
 u_epsilon <- rnorm(n,mean=0,sd=1)
 gx <- function(f_x0=x0,f_kappa=u_kappa,f_theta=u_theta,f_beta=u_beta,f_epsilon=u_epsilon,f_n=n){
   tmp <- c()
@@ -34,7 +34,7 @@ names(re) <- c("x0=0.06","x0=0.08","x0=0.12",
 rem <- melt(data=re)
 rem$c1 <- c(rep("x0",3*n+3),rep("ka",3*n+3),rep("th",3*n+3),rep("be",3*n+3))
 rem$c1 <- factor(rem$c1,levels=c("x0","ka","th","be"))
-rem$x <- rep(1:201,12)
+rem$x <- rep(1:(n+1),12)
 p <- ggplot(rem,aes(x=x,y=value))
-qp <- p+geom_line(aes(color=variable))+facet_wrap(~c1)
-ggsave("C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P54.PDF",qp)
+p+geom_line(aes(color=variable))+facet_wrap(~c1)
+ggsave("C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P54.PDF")
