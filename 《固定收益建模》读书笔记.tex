@@ -416,7 +416,7 @@ $$dx_t=\mu_t dt+\sigma_tdz_t$$
 $$x_{t'}-x_t=\int_t^{t'}\mu_u du +\int_t^{t'} \sigma_u dz_u$$
 最后一项还是一个随机积分项。
 
-\subsection{随机积分}
+\subsection{随机积分（证明有略）}
 
 形如$\int_t^{t'} \sigma(x_u,u)dz_u$的积分项，被称为随机积分或伊藤积分。尽管随机积分也可以定义为对更广义的随机过程积分，我们只考察积分变量$z$为标准布朗运动的情况。
 
@@ -580,6 +580,135 @@ Var_t[x_{t'}] &=\int_t^{t'}\beta(u)^2 e^{-2 \kappa(t'-u)}du \notag
 
 \subsection{平方根过程}
 
+$$dx_t=[\varphi-\kappa x_t]dt+\beta \sqrt{x_t}dz_t=\kappa[\theta-x_t]dt+\beta\sqrt{x_t}dz_t$$
+其中$\varphi=\kappa \theta$。在此，$\varphi,\theta,\beta,\kappa$都是正的常数。这个过程叫做平方根过程。假设初始值$x_0$为正，那么我们可以应用平方根函数。与OU过程的不同之处在于波动率项中的$\sqrt{x_t}$。现在方差为$\beta^2 x_t$。平方根过程同样具有均值回归的特征。
+
+平方根过程只能取非负值。证明如下：如果取值为0，那么漂移率为正且波动率为0，于是过程取值随即变成正值[0被称为所谓的反射障碍（reflecting barrier）]。可以证明，如果$2\varphi \geqslant \beta^2$，过程正的漂移率取值虽小但相对于波动率如此之大以至于过程不能到达0，而是保持严格为正。因此，平方根过程的值空间是$S=[0,\infty)$或$S=(0,\infty)$。
+
+平方根过程的路径模拟可以通过连续地计算获得：
+
+$$x_{t_i}=x_{t_{i-1}}+\kappa[\theta-x_{t_{i-1}}](t_i-t_{i-1})+\beta\sqrt{x_{t_{i-1}}}\sqrt{t_i-t_{i-1}}$$
+
+\begin{figure}[H]
+\centering
+\includegraphics{P56.pdf}
+\caption*{初始值$x_0 =0.08$ \quad \footnotemark}
+\end{figure}
+\footnotetext{不同的$\beta$使两个过程在长期水平上具有相同的方差，下图类似}
+\begin{figure}[H]
+\centering
+\includegraphics{P56_2.pdf}
+\caption*{$x_0 =0.06$,不同随机数}
+\end{figure}
+
+\clearpage
+\begin{lstlisting}[language=R]  
+pdf("C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P56.pdf")
+n <- 200;l <- 2
+u_x0 <- 0.08
+u_kappa <- log(2)
+u_OU_beta <- 0.03
+u_SQ_beta <- 0.03/sqrt(0.08)
+u_theta <- 0.08
+u_epsilon1 <- rnorm(n)
+u_epsilon2 <- rnorm(n)
+f_OU <- function(f_x0=u_x0,f_kappa=u_kappa,f_theta=u_theta,f_beta=u_OU_beta,f_epsilon=u_epsilon1,f_n=n,f_l=l){
+  tmp <- c()
+  tmp[1]=f_x0
+  for (i in 1:f_n) {
+    tmp[i+1] <- tmp[i]+f_kappa*(f_l/n)*(f_theta-tmp[i])+f_beta*f_epsilon[i]*sqrt(f_l/n)
+  }
+  tmp
+}
+f_SQ <- function(f_x0=u_x0,f_kappa=u_kappa,f_theta=u_theta,f_beta=u_SQ_beta,f_epsilon=u_epsilon1,f_n=n,f_l=l){
+  tmp <- c()
+  tmp[1] <- f_x0
+  for (i in 1:f_n){
+    tmp[i+1] <- tmp[i]+f_kappa*(f_l/n)*(f_theta-tmp[i])+f_beta*f_epsilon[i]*sqrt(f_l/n)*sqrt(tmp[i])
+  }
+  tmp
+}
+plot(f_OU(),type="l",col="blue",ylim=c(min(f_OU(),f_SQ()),max(f_OU(),f_SQ())))
+lines(f_SQ(),type="l",col="red")
+legend("topleft",legend=c("OU","SQRT"),col=c("blue","red"),lty=1)
+title("OU vs SQRT");mtext(expression(paste("all parameters are same except beta, OU_beta=0.03,SQRT_beta=0.03/",sqrt(0.08),sep="")),3)
+dev.off()
+pdf("C:\\Users\\think\\Desktop\\FixedIncomeModelling.git\\trunk\\P56_2.pdf")
+df1 <- f_OU(f_x0=0.06,f_epsilon = u_epsilon1)
+df2 <- f_SQ(f_x0=0.06,f_epsilon = u_epsilon2)
+plot(df1,type="l",col="blue",ylim=c(min(df1,df2),max(df1,df2)))
+lines(df2,type="l",col="red")
+legend("topleft",legend=c("OU","SQRT"),col=c("blue","red"),lty=1)
+title("OU vs SQRT");mtext("all parameters are same except epsilon",3)
+dev.off()
+\end{lstlisting}
+\clearpage
+
+由于平方根不过不可能为负，所以过程的未来值不可能服从正态分布。利用与应用在OU过程上相同的手法，也就是考察$y_t=e^{\kappa t}x_t$。由伊藤引理
+\begin{align}
+dy
+&=\frac{\partial y}{\partial t}dt  &&+ \frac{\partial y}{\partial x} dx  &&+ \frac{\partial^2 y}{\partial x^2} (dx)^2 \notag \\
+&= \kappa e^{\kappa t} x dt &&+  e^{\kappa t} dx &&+0 \notag \\
+&= \kappa e^{\kappa t} x dt &&+e^{\kappa t}[(\varphi-\kappa x_t)dt+\beta \sqrt{x_t}dz_t] \notag \\
+&=0 &&+\varphi e^{\kappa t} dt +\beta \sqrt{x_u}e^{\kappa t}dz_t \notag
+\end{align}
+所以
+$$y_{t'}=y_t+\int_t^{t'}\varphi e^{\kappa u}du+ \int_t^{t'}\beta \sqrt{x_u} e^{\kappa u} dz_u$$
+将$y_t=e^{\kappa t}x_t$代入得
+$$x_{t'}=x_t e^{-(t'-t)} + \theta(1-e^{-(t'-t)})+\beta \int_t^{t'}e^{-(t'-u)} \sqrt{x_u}dz_u$$
+由于x进入到随机积分中，不能立即从这一方程确定给定$x_t$情况下$x_{t'}$的分布。但是，可以计算$x_{t'}$的均值和方差。
+
+根据随机积分均值为0的事实，见如下定理
+\qd{
+\begin{quote}
+如果$\sigma=(\sigma_t)$满足正则条件，随机积分$\int_t^{t'}\sigma_u dz_u$具有以下特征：
+$$E_t[\int_t^{t'}\sigma_u dz_u]=0$$
+$$Var_t[\int_t^{t'}\sigma_u dz_u]=\int_t^{t'}E_t[\sigma_u^2]du$$
+\end{quote}
+}
+很容易得到
+$$E_t[x_{t'}]=x_t e^{-(t'-t)} + \theta(1-e^{-(t'-t)})=\theta+(x_t-\theta) e^{-(t'-t)}$$
+根据上述定理的第二个等式
+\begin{align}
+Var_t[x_{t'}]
+&=Var_t[\beta \int_t^{t'}e^{-(t'-u)} \sqrt{x_u}dz_u] \notag \\
+&=\beta^2 \int_t^{t'} e^{-2 \kappa (t'-u)} E_t[x_u]du \notag \\
+&=\beta^2 \int_t^{t'} e^{-2 \kappa (t'-u)} (x_t e^{-(t'-t)} + \theta(1-e^{-(t'-t)})=\theta+(x_t-\theta) e^{-(t'-t)}) du \notag \\
+&=\beta^2 \theta \int_t^{t'} e^{-2 \kappa (t'-u)} du + \beta^2 (x_t-\theta) e^{-2 \kappa  t' + \kappa t} \int_t^{t'} e^{\kappa u}du \notag \\
+&=\frac{\beta^2 \theta}{2 \kappa} (1-e^{-2 \kappa (t'-t)}) + \frac{\beta^2}{\kappa}(x_t-\theta)(e^{-\kappa(t'-t)}-e^{-2 \kappa(t'-t)}) \notag \\
+&=\frac{\beta^2 x_t}{\kappa}(e^{-\kappa(t'-t)}-e^{-2 \kappa(t'-t)}) + \frac{\beta^2 \theta}{2 \kappa}(1-e^{-\kappa(t'-t)})^2 \notag 
+\end{align}
+我们注意到均值与OU过程相同，但平方根过程的方差更为复杂。对于$t' \rightarrow \infty$，均值趋近于$\theta$，方差趋近于$\theta \beta^2 /(2 \kappa)$。对于$\kappa \rightarrow \infty$，均值趋近于当前值$x_t$，方差趋近于$\beta^2 x_t (t'-t)$
+
+可以证明，以$x_t$为条件，$x_{t'},t' > t$的取值由非中心$\chi^2$分布给出。非中心$\chi^2$分布由自由度参数$a$和非中心参数$b$确定，表示为$\chi^2(a,b)$。更准确地，给定$x_t$的情况下$x_{t'}$的分布与随机变量$Y/c(t'-t)$的分布是相同的，在此$c$是确定量函数
+$$c(\tau)=\frac{4\kappa}{\beta^2(1-e^{-\kappa \tau})}$$
+以及$Y$是一个服从$\chi^2(a,b(t'-t))$分布的随机变量，且
+$$a=\frac{4 \varphi}{\beta^2},b(\tau)=x_t c(\tau) e^{-\kappa \tau}$$
+服从$\chi^2(a,b)$分布的随机变量的密度函数是
+\begin{align}
+f_{\chi^2(a,b)}(y)
+&= \sum\limits_{i=0}^\infty \frac{e^{-b/2} (b/2)^i}{i!} f_{\chi^2(a+2i)}(y)\notag \\
+&= \sum\limits_{i=0}^\infty \frac{e^{-b/2} (b/2)^i}{i!} \frac{(1/2)^{i+a/2}}{\Gamma(i+a/2)} y^{i-1+a/2} e^{-y/2} \notag
+\end{align}
+在此，$f_{\chi^2 (a+2i)}$是自由度为a+2i的中心$\chi^2$分布的密度函数。在第一个和式中插入这一密度函数将得到第二个和式。在此$\Gamma$代表所谓的伽马函数$\Gamma(m)=\int_0^\infty x^{m-1}e^{-x}dx$。对基于$x_t$的$x_{t'}$的取值的概率密度函数因此是
+$$f(x)=c(t'-t)f_{\chi^2(a,b(t'-t))}(c(t'-t)x)$$
+服从$\chi^2(a,b)$分布的随机变量的均值和方差分别为$(a+b)$和$2(a+2b)$。这就打开了另一扇给定$x_t$的情况下推导$x_{t'}$的均值和方差的大门。这一方法给出的结果与前面给出的结果相同。
+
+一个经常利用的利率期限动态结构模型是基于短期利率服从平方根过程的假设。由于利率为正，而且从经验上看，其波动率也与利率水平正相关，所以平方根过程比OU过程更贴近利率动态变化的现实情况。但是基于平方根过程的模型远比基于OU过程的模型更难分析。
+
+\subsection{多维过程概述}
+
+如果外生冲击过程$z=(z_t)_{t \in [0,T]}$是一维的，那么任何两个过程的瞬时增量僵尸完美相关的。我们需要维数大于1的外生冲击，也就是冲击向量。不是一般性，我们可以假设这一冲击的不同组成部分之间是彼此独立的，通过改变这些过程对不同外生冲击的敏感性，就能在相关的过程中产生非完美的相关性。
+
+\subsection{二维随机过程}
+
+\subsection{K---维过程}
+
+\subsection{概率测度变换}
+
+\section{关于资产定价理论的评论}
+
+资产定价理论的基本概念是套利、状态价格、风险中性概率测度、风险的市场价格以及市场完整性。
 
 
 \end{document}
